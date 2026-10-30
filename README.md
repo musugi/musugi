@@ -1,4 +1,4 @@
-<h1 align="center">Hi there 👋 I'm musugi</h1>
+<h1 align="center">Hi there, welcome to my page!</h1>
 
 <p align="center">
   <img src="https://github-stats-extended.vercel.app/api?username=musugi&show_icons=true&locale=ja&theme=chartreuse-dark&commits_year=2026" alt="GitHub Stats" width="410" />
