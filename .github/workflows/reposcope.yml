@@ -1,0 +1,49 @@
+name: Update Language Stats
+
+on:
+    schedule:
+        - cron: "0 0 * * 1" # Every Monday
+    workflow_dispatch:
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+
+        steps:
+            - name: Checkout target repo
+              uses: actions/checkout@v4
+
+            - name: Download self-reposcope binary from GitHub Release
+              shell: bash
+              run: |
+                  curl -L https://github.com/4okimi7uki/self-reposcope/releases/latest/download/self-reposcope -o self-reposcope
+                  chmod +x ./self-reposcope
+
+            - name: Run self-reposcope CLI
+              shell: bash
+              run: |
+                  mkdir -p output
+                  ./self-reposcope --token ${{ secrets.REPOSCOPE_TOKEN }}
+
+            # github-stats-extended の commits_year を今年に合わせる
+            - name: Update commits_year in README
+              shell: bash
+              run: |
+                  sed -i "s/commits_year=[0-9]\{4\}/commits_year=$(date -u +%Y)/" README.md
+
+            - name: Commit and Push updated files
+              shell: bash
+              env:
+                  GH_PAT: ${{ secrets.REPOSCOPE_TOKEN }}
+              run: |
+                  git config --global user.name 'github-actions[bot]'
+                  git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+                  git add output/*.svg README.md
+                  if git diff --cached --quiet; then
+                    echo "No changes to commit"
+                  else
+                    git commit -m "update: language stats svg"
+                    git push https://x-access-token:${GH_PAT}@github.com/${{ github.repository }} HEAD:main
+                  fi
